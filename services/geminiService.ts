@@ -38,8 +38,12 @@ export const generateImage = async (config: ImageGenerationConfig): Promise<stri
   if (config.style && config.style !== 'None') finalPrompt += `, Style: ${config.style}`;
   if (config.mood && config.mood !== 'None') finalPrompt += `, Mood: ${config.mood}`;
   if (config.lighting && config.lighting !== 'None') finalPrompt += `, Lighting: ${config.lighting}`;
+  if (config.camera && config.camera !== 'None') finalPrompt += `, Perspective: ${config.camera}`;
+  if (config.lens && config.lens !== 'None') finalPrompt += `, Lens: ${config.lens}`;
+  if (config.focus && config.focus !== 'None') finalPrompt += `, Focus: ${config.focus}`;
   if (config.colorGrade && config.colorGrade !== 'None') finalPrompt += `, Color Grade: ${config.colorGrade}`;
   if (config.negativePrompt) finalPrompt += `, Exclude: ${config.negativePrompt}`;
+  
   const parts: any[] = (config.referenceImages || []).map(img => ({
     inlineData: { data: img.split(',')[1], mimeType: img.split(';')[0].split(':')[1] }
   }));

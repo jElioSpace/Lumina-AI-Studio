@@ -1,6 +1,8 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useHistory } from '../contexts/HistoryContext';
+import { SettingsModal } from './SettingsModal';
 
 interface Props {
   onBack?: () => void;
@@ -9,11 +11,13 @@ interface Props {
 }
 
 export const AppHeader: React.FC<Props> = ({ onBack, title, subtitle }) => {
-  const { language, setLanguage, t } = useLanguage();
+  const { t } = useLanguage();
   const { setIsOpen } = useHistory();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   return (
     <header className="w-full flex flex-col items-center justify-center pt-4 pb-3 px-2 md:pt-8 md:pb-6 md:px-0 relative border-b border-slate-800/30 mb-4 md:mb-10">
+      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
       
       <div className="w-full max-w-7xl flex flex-row items-center justify-between gap-2 md:gap-3">
         
@@ -43,29 +47,22 @@ export const AppHeader: React.FC<Props> = ({ onBack, title, subtitle }) => {
           </div>
         </div>
 
-        {/* Right Side: Language and History */}
+        {/* Right Side: Tools and Settings */}
         <div className="flex items-center gap-2 shrink-0">
-           <div className="flex bg-[#0f172a] rounded-xl p-0.5 md:p-1 border border-slate-800/50 shadow-inner">
-             <button 
-               onClick={() => setLanguage('en')}
-               className={`px-2 py-1 md:px-3 md:py-1.5 rounded-lg text-[9px] md:text-xs font-black transition-all ${language === 'en' ? 'bg-[#1e293b] text-white shadow-md' : 'text-slate-600 hover:text-slate-400'}`}
-             >
-               US
-             </button>
-             <button 
-               onClick={() => setLanguage('mm')}
-               className={`px-2 py-1 md:px-3 md:py-1.5 rounded-lg text-[9px] md:text-xs font-black transition-all ${language === 'mm' ? 'bg-[#1e293b] text-white shadow-md' : 'text-slate-600 hover:text-slate-400'}`}
-             >
-               MM
-             </button>
-           </div>
-
            <button 
               onClick={() => setIsOpen(true)}
               className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-xl bg-[#1e293b]/20 border border-slate-800 text-slate-500 hover:text-violet-400 transition-all shrink-0"
               aria-label="Open history"
            >
               <span className="material-icons-round text-lg md:text-xl">history</span>
+           </button>
+
+           <button 
+              onClick={() => setIsSettingsOpen(true)}
+              className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-xl bg-[#1e293b]/20 border border-slate-800 text-slate-500 hover:text-violet-400 transition-all shrink-0"
+              aria-label="Open settings"
+           >
+              <span className="material-icons-round text-lg md:text-xl">settings</span>
            </button>
         </div>
       </div>

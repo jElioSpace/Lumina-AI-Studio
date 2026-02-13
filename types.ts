@@ -1,4 +1,3 @@
-
 export enum AspectRatio {
   Square = "1:1",
   Portrait34 = "3:4",
@@ -22,6 +21,8 @@ export interface ImageGenerationConfig {
   lighting: string;
   size: string; // Combined size/ratio selection
   camera: string;
+  lens?: string;
+  focus?: string;
   colorGrade: string;
   negativePrompt: string;
   seed: number | undefined;

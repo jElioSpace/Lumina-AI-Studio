@@ -33,7 +33,39 @@ export const LIGHTING_OPTIONS = [
   { label: 'Rembrandt', value: 'Strong Contrast' },
   { label: 'Golden Hour', value: 'Warm Golden Light' },
   { label: 'Neon Accent', value: 'Glow / Neon Accent Light' },
-  { label: 'Moonlight', value: 'Soft Moonlight' }
+  { label: 'Moonlight', value: 'Soft Moonlight' },
+  { label: 'Flash Photography', value: 'Harsh Flash' }
+];
+
+export const CAMERA_OPTIONS = [
+  { label: 'None', value: 'None' },
+  { label: 'Eye Level', value: 'Eye Level' },
+  { label: 'Low Angle', value: 'Low Angle' },
+  { label: 'High Angle', value: 'High Angle' },
+  { label: 'Bird\'s Eye View', value: 'Bird\'s Eye View' },
+  { label: 'Drone / Aerial', value: 'Aerial Shot' },
+  { label: 'Dutch Angle', value: 'Dutch Angle' },
+  { label: 'Extreme Close Up', value: 'Extreme Close Up' }
+];
+
+export const LENS_OPTIONS = [
+  { label: 'None', value: 'None' },
+  { label: '35mm Wide', value: '35mm Lens' },
+  { label: '50mm Prime', value: '50mm Prime Lens' },
+  { label: '85mm Portrait', value: '85mm Portrait Lens' },
+  { label: 'Telephoto', value: 'Telephoto Lens' },
+  { label: 'Wide Angle', value: 'Wide Angle Lens' },
+  { label: 'Fish Eye', value: 'Fish Eye Lens' },
+  { label: 'Anamorphic', value: 'Anamorphic Lens' }
+];
+
+export const FOCUS_OPTIONS = [
+  { label: 'None', value: 'None' },
+  { label: 'Deep Focus', value: 'Deep Focus' },
+  { label: 'Shallow Focus', value: 'Shallow Focus (Bokeh)' },
+  { label: 'Sharp Focus', value: 'Sharp Focus' },
+  { label: 'Soft Focus', value: 'Soft Focus' },
+  { label: 'Motion Blur', value: 'Motion Blur' }
 ];
 
 export const COLLAGE_LAYOUTS = [
