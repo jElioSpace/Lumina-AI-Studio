@@ -13,48 +13,48 @@ export const AppHeader: React.FC<Props> = ({ onBack, title, subtitle }) => {
   const { setIsOpen } = useHistory();
 
   return (
-    <header className="w-full flex flex-col items-center justify-center pt-5 pb-4 px-4 md:pt-8 md:pb-6 md:px-0 relative border-b border-slate-800/30 mb-6 md:mb-10">
+    <header className="w-full flex flex-col items-center justify-center pt-4 pb-3 px-2 md:pt-8 md:pb-6 md:px-0 relative border-b border-slate-800/30 mb-4 md:mb-10">
       
-      <div className="w-full max-w-7xl flex flex-row items-center justify-between gap-3">
+      <div className="w-full max-w-7xl flex flex-row items-center justify-between gap-2 md:gap-3">
         
         {/* Left Side: Back and Brand */}
-        <div className="flex items-center gap-3 md:gap-4">
+        <div className="flex items-center gap-2 md:gap-4 min-w-0">
           {onBack && (
             <button 
               onClick={onBack}
-              className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#1e293b]/30 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 transition-all shrink-0"
+              className="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-xl bg-[#1e293b]/30 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 transition-all shrink-0"
               aria-label="Go back"
             >
-              <span className="material-icons-round text-xl">arrow_back</span>
+              <span className="material-icons-round text-lg md:text-xl">arrow_back</span>
             </button>
           )}
 
-          <div className="flex items-center gap-3">
-             <div className="relative w-10 h-10 bg-[#1e1e2e] rounded-xl border border-slate-800/50 flex items-center justify-center shadow-lg shrink-0">
+          <div className="flex items-center gap-2 md:gap-3 min-w-0">
+             <div className="relative w-8 h-8 md:w-10 md:h-10 bg-[#1e1e2e] rounded-xl border border-slate-800/50 flex items-center justify-center shadow-lg shrink-0">
                <div className="absolute inset-0 bg-gradient-to-tr from-violet-600/10 to-fuchsia-600/10"></div>
-               <span className="material-icons-round text-fuchsia-500 text-2xl z-10">auto_awesome</span>
+               <span className="material-icons-round text-fuchsia-500 text-xl md:text-2xl z-10">auto_awesome</span>
              </div>
-             <h1 className="text-xl md:text-2xl font-bold tracking-tight flex items-center whitespace-nowrap">
-                <span className="text-white">Lumina</span>
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-violet-500 to-fuchsia-500 ml-2">
-                  AI Studio
+             <h1 className="text-lg md:text-2xl font-bold tracking-tight flex items-center whitespace-nowrap overflow-hidden">
+                <span className="text-white hidden xs:inline">Lumina</span>
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-violet-500 to-fuchsia-500 ml-1.5 md:ml-2">
+                  Studio
                 </span>
              </h1>
           </div>
         </div>
 
         {/* Right Side: Language and History */}
-        <div className="flex items-center gap-3">
-           <div className="flex bg-[#0f172a] rounded-xl p-1 border border-slate-800/50 shadow-inner">
+        <div className="flex items-center gap-2 shrink-0">
+           <div className="flex bg-[#0f172a] rounded-xl p-0.5 md:p-1 border border-slate-800/50 shadow-inner">
              <button 
                onClick={() => setLanguage('en')}
-               className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all ${language === 'en' ? 'bg-[#1e293b] text-white shadow-md' : 'text-slate-600 hover:text-slate-400'}`}
+               className={`px-2 py-1 md:px-3 md:py-1.5 rounded-lg text-[9px] md:text-xs font-black transition-all ${language === 'en' ? 'bg-[#1e293b] text-white shadow-md' : 'text-slate-600 hover:text-slate-400'}`}
              >
                US
              </button>
              <button 
                onClick={() => setLanguage('mm')}
-               className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all ${language === 'mm' ? 'bg-[#1e293b] text-white shadow-md' : 'text-slate-600 hover:text-slate-400'}`}
+               className={`px-2 py-1 md:px-3 md:py-1.5 rounded-lg text-[9px] md:text-xs font-black transition-all ${language === 'mm' ? 'bg-[#1e293b] text-white shadow-md' : 'text-slate-600 hover:text-slate-400'}`}
              >
                MM
              </button>
@@ -62,18 +62,18 @@ export const AppHeader: React.FC<Props> = ({ onBack, title, subtitle }) => {
 
            <button 
               onClick={() => setIsOpen(true)}
-              className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#1e293b]/20 border border-slate-800 text-slate-500 hover:text-violet-400 transition-all"
+              className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-xl bg-[#1e293b]/20 border border-slate-800 text-slate-500 hover:text-violet-400 transition-all shrink-0"
               aria-label="Open history"
            >
-              <span className="material-icons-round text-xl">history</span>
+              <span className="material-icons-round text-lg md:text-xl">history</span>
            </button>
         </div>
       </div>
 
       {/* Subtitle / Breadcrumb */}
       {(subtitle || title) && (
-        <div className="w-full max-w-7xl mt-4 px-1">
-           <div className="text-[10px] md:text-[11px] font-bold text-slate-500 uppercase tracking-[0.4em] opacity-90">
+        <div className="w-full max-w-7xl mt-3 px-2">
+           <div className="text-[9px] md:text-[11px] font-bold text-slate-500 uppercase tracking-[0.3em] md:tracking-[0.4em] opacity-90 truncate">
               {subtitle || title}
            </div>
         </div>

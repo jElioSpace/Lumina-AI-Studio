@@ -9,6 +9,7 @@ interface Props {
   onGenerateTitles?: (content: string) => void;
   onGenerateImage?: (content: string) => void;
   onUpdateText?: (newText: string) => void;
+  onClear?: () => void;
 }
 
 export const GeneratedResultView: React.FC<Props> = ({ 
@@ -16,7 +17,8 @@ export const GeneratedResultView: React.FC<Props> = ({
   title, 
   onGenerateTitles, 
   onGenerateImage,
-  onUpdateText 
+  onUpdateText,
+  onClear
 }) => {
   const { imageUrl, text, error, loading } = result;
   const { t } = useLanguage();
@@ -66,6 +68,15 @@ export const GeneratedResultView: React.FC<Props> = ({
           {title}
         </h3>
         <div className="flex gap-2">
+          {(imageUrl || text || error) && onClear && !loading && (
+            <button 
+              onClick={onClear}
+              className="text-[10px] font-black text-slate-500 hover:text-red-400 uppercase tracking-widest transition-colors mr-2 flex items-center gap-1"
+            >
+              <span className="material-icons-round text-sm">clear_all</span>
+              {t('btn.clear_result')}
+            </button>
+          )}
           <div className="w-3 h-3 rounded-full bg-slate-800"></div>
           <div className="w-3 h-3 rounded-full bg-slate-800"></div>
         </div>

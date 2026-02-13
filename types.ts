@@ -1,3 +1,4 @@
+
 export enum AspectRatio {
   Square = "1:1",
   Portrait34 = "3:4",
@@ -54,11 +55,15 @@ export interface SimplePostCTA {
 
 export interface SimplePostConfig {
   logo: string | null; // Base64
+  backgroundImage?: string | null; // Base64
   headline: string;
   tagline: string;
   content: string;
+  address?: string;
   ctas: SimplePostCTA[];
   size: string;
+  // Added theme property to resolve 'theme' does not exist on type 'SimplePostConfig' errors
+  theme?: string;
 }
 
 export interface ContentGenerationConfig {

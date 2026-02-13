@@ -4,10 +4,10 @@ import { Button } from './Button';
 import { TextArea, Select, FileUpload, MultiFileUpload, Input } from './InputControls';
 import { GeneratedResultView } from './GeneratedResultView';
 import { GenerationMode, GeneratedResult, SimplePostCTA } from '../types';
-import { generateImage, editImage, analyzeImage, generateSimpleSocialPost, generateCollage } from '../services/geminiService';
+import { generateImage, editImage, analyzeImage, generateSimpleSocialPost, generateCollage, describeImageForPrompt } from '../services/geminiService';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useHistory } from '../contexts/HistoryContext';
-import { STYLE_HIERARCHY, MOOD_MAP, LIGHTING_MAP } from '../constants';
+import { STYLE_HIERARCHY, COLOR_GRADE_OPTIONS, LIGHTING_OPTIONS, COLLAGE_LAYOUTS, SIMPLE_POST_THEMES } from '../constants';
 
 interface GraphicAIProps {
   onBack: () => void;
@@ -15,13 +15,14 @@ interface GraphicAIProps {
   initialResult?: string;
 }
 
+const STORAGE_KEY = 'lumina_graphic_state';
+
 export const GraphicAI: React.FC<GraphicAIProps> = ({ onBack, initialPrompt, initialResult }) => {
   const { t, language } = useLanguage();
   const { addToHistory } = useHistory();
   const [activeTab, setActiveTab] = useState<GenerationMode>(GenerationMode.Generate);
-  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
   
-  const [genPrompt, setGenPrompt] = useState(initialPrompt || '');
+  const [genPrompt, setGenPrompt] = useState('');
   const [genMainStyle, setGenMainStyle] = useState('None');
   const [genSubStyle, setGenSubStyle] = useState('None');
   const [genMood, setGenMood] = useState('None');
@@ -39,9 +40,12 @@ export const GraphicAI: React.FC<GraphicAIProps> = ({ onBack, initialPrompt, ini
   const [collagePrompt, setCollagePrompt] = useState('');
 
   const [simpleLogo, setSimpleLogo] = useState<string | null>(null);
+  const [simpleBgImage, setSimpleBgImage] = useState<string | null>(null);
   const [simpleHeadline, setSimpleHeadline] = useState('');
   const [simpleTagline, setSimpleTagline] = useState('');
   const [simpleContent, setSimpleContent] = useState('');
+  const [simpleAddress, setSimpleAddress] = useState('');
+  const [simplePostTheme, setSimplePostTheme] = useState('Clean Minimalist');
   const [simpleCtas, setSimpleCtas] = useState<SimplePostCTA[]>([{ type: 'phone', value: '' }]);
 
   const [sourceImage, setSourceImage] = useState<string | null>(null);
@@ -53,16 +57,63 @@ export const GraphicAI: React.FC<GraphicAIProps> = ({ onBack, initialPrompt, ini
   const [result, setResult] = useState<GeneratedResult>({ loading: false });
 
   useEffect(() => {
-    if (initialPrompt) setGenPrompt(initialPrompt);
-  }, [initialPrompt]);
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        const state = JSON.parse(saved);
+        setGenPrompt(state.genPrompt || '');
+        setGenMainStyle(state.genMainStyle || 'None');
+        setGenSubStyle(state.genSubStyle || 'None');
+        setGenMood(state.genMood || 'None');
+        setGenLighting(state.genLighting || 'Natural');
+        setGenCamera(state.genCamera || 'None');
+        setGenColor(state.genColor || 'None');
+        setGenNegativePrompt(state.genNegativePrompt || '');
+        setGenSeed(state.genSeed || '');
+        setGenSize(state.genSize || '16:9');
+        setReferenceImages(state.referenceImages || []);
+        setCollageImages(state.collageImages || []);
+        setCollageLayout(state.collageLayout || 'Balanced Grid');
+        setCollageTheme(state.collageTheme || 'Clean Minimalist');
+        setCollagePrompt(state.collagePrompt || '');
+        setSimpleLogo(state.simpleLogo || null);
+        setSimpleBgImage(state.simpleBgImage || null);
+        setSimpleHeadline(state.simpleHeadline || '');
+        setSimpleTagline(state.simpleTagline || '');
+        setSimpleContent(state.simpleContent || '');
+        setSimpleAddress(state.simpleAddress || '');
+        setSimplePostTheme(state.simplePostTheme || 'Clean Minimalist');
+        setSimpleCtas(state.simpleCtas || [{ type: 'phone', value: '' }]);
+        setSourceImage(state.sourceImage || null);
+        setEditPrompt(state.editPrompt || '');
+        setEditMood(state.editMood || 'None');
+        setEditSize(state.editSize || 'original');
+        setAnalyzePrompt(state.analyzePrompt || '');
+        setActiveTab(state.activeTab || GenerationMode.Generate);
+      } catch (e) {}
+    }
+  }, []);
 
   useEffect(() => {
-    if (initialResult) setResult({ loading: false, imageUrl: initialResult });
-  }, [initialResult]);
+    const state = {
+      genPrompt, genMainStyle, genSubStyle, genMood, genLighting, genCamera, genColor,
+      genNegativePrompt, genSeed, genSize, referenceImages, collageImages, collageLayout,
+      collageTheme, collagePrompt, simpleLogo, simpleBgImage, simpleHeadline, simpleTagline,
+      simpleContent, simpleAddress, simplePostTheme, simpleCtas, sourceImage, editPrompt, editMood, editSize,
+      analyzePrompt, activeTab
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }, [
+    genPrompt, genMainStyle, genSubStyle, genMood, genLighting, genCamera, genColor,
+    genNegativePrompt, genSeed, genSize, referenceImages, collageImages, collageLayout,
+    collageTheme, collagePrompt, simpleLogo, simpleBgImage, simpleHeadline, simpleTagline,
+    simpleContent, simpleAddress, simplePostTheme, simpleCtas, sourceImage, editPrompt, editMood, editSize,
+    analyzePrompt, activeTab
+  ]);
 
-  const moodOptions = useMemo(() => Object.entries(MOOD_MAP).map(([value, key]) => ({ label: t(key), value })), [t]);
-  const lightingOptions = useMemo(() => Object.entries(LIGHTING_MAP).map(([value, key]) => ({ label: t(key), value })), [t]);
-  
+  useEffect(() => { if (initialPrompt) setGenPrompt(initialPrompt); }, [initialPrompt]);
+  useEffect(() => { if (initialResult) setResult({ loading: false, imageUrl: initialResult }); }, [initialResult]);
+
   const sizeOptions = useMemo(() => [
     { label: t('cat.social'), options: [
         { label: `Square (1080x1080)`, value: '1080x1080' },
@@ -77,158 +128,149 @@ export const GraphicAI: React.FC<GraphicAIProps> = ({ onBack, initialPrompt, ini
     ]}
   ], [t]);
 
-  const tabs = useMemo(() => [
-    { id: GenerationMode.Generate, icon: 'auto_awesome', label: t('tab.generate') },
-    { id: GenerationMode.Collage, icon: 'collections', label: t('tab.collage') },
-    { id: GenerationMode.SimplePost, icon: 'amp_stories', label: t('tab.simple_post') },
-    { id: GenerationMode.Edit, icon: 'edit', label: t('tab.edit') },
-    { id: GenerationMode.Analyze, icon: 'document_scanner', label: t('tab.analyze') }
-  ], [t]);
-
-  const activeTabLabel = useMemo(() => {
-    return tabs.find(tab => tab.id === activeTab)?.label || '';
-  }, [activeTab, tabs]);
-
   const handleMainStyleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newMainStyle = e.target.value;
-    setGenMainStyle(newMainStyle);
-    setGenSubStyle(STYLE_HIERARCHY[newMainStyle]?.[0] || 'None');
+    const newStyle = e.target.value;
+    setGenMainStyle(newStyle);
+    setGenSubStyle(STYLE_HIERARCHY[newStyle]?.[0] || 'None');
+  };
+
+  const handleError = (err: any) => {
+    const msg = err.message || String(err);
+    if (msg.includes("Requested entity was not found")) {
+      window.dispatchEvent(new CustomEvent('reset-api-key'));
+    }
+    setResult({ loading: false, error: msg });
+  };
+
+  const handleImageToPrompt = async (img: string) => {
+    setResult({ loading: true });
+    try {
+      const desc = await describeImageForPrompt(img);
+      setGenPrompt(desc);
+      setResult({ loading: false });
+    } catch (err: any) {
+      handleError(err);
+    }
   };
 
   const handleAction = async () => {
     setResult({ loading: true, error: undefined });
     try {
       if (activeTab === GenerationMode.Generate) {
-        if (!genPrompt) throw new Error("Please enter a prompt.");
-        const finalStyle = genMainStyle !== 'None' ? `${genMainStyle} - ${genSubStyle}` : 'None';
         const imageUrl = await generateImage({
-          prompt: genPrompt, style: finalStyle, mood: genMood, lighting: genLighting, size: genSize, camera: genCamera, colorGrade: genColor, negativePrompt: genNegativePrompt, seed: genSeed ? parseInt(genSeed) : undefined, referenceImages
+          prompt: genPrompt, style: `${genMainStyle} - ${genSubStyle}`, mood: genMood, lighting: genLighting, size: genSize, camera: genCamera, colorGrade: genColor, negativePrompt: genNegativePrompt, seed: genSeed ? parseInt(genSeed) : undefined, referenceImages
         });
         setResult({ loading: false, imageUrl });
         addToHistory({ type: 'image', prompt: genPrompt, result: imageUrl });
       } else if (activeTab === GenerationMode.Collage) {
-        if (collageImages.length < 2) throw new Error("Min 2 images required.");
         const imageUrl = await generateCollage({ prompt: collagePrompt, images: collageImages, layout: collageLayout, theme: collageTheme, size: genSize });
         setResult({ loading: false, imageUrl });
         addToHistory({ type: 'image', prompt: `Collage: ${collageLayout}`, result: imageUrl });
       } else if (activeTab === GenerationMode.SimplePost) {
-        const imageUrl = await generateSimpleSocialPost({ logo: simpleLogo, headline: simpleHeadline, tagline: simpleTagline, content: simpleContent, ctas: simpleCtas, size: genSize });
+        const imageUrl = await generateSimpleSocialPost({ 
+          logo: simpleLogo, backgroundImage: simpleBgImage, headline: simpleHeadline, tagline: simpleTagline, content: simpleContent, address: simpleAddress, ctas: simpleCtas, size: genSize, theme: simplePostTheme
+        });
         setResult({ loading: false, imageUrl });
-        addToHistory({ type: 'image', prompt: `Post: ${simpleHeadline}`, result: imageUrl });
+        addToHistory({ type: 'image', prompt: `Post: ${simpleHeadline || simpleAddress}`, result: imageUrl });
       } else if (activeTab === GenerationMode.Edit) {
         const imageUrl = await editImage({ prompt: editPrompt, sourceImage, mood: editMood, size: editSize });
         setResult({ loading: false, imageUrl });
-        addToHistory({ type: 'image', prompt: `Edit: ${editPrompt}`, result: imageUrl });
+        addToHistory({ type: 'image', prompt: editPrompt, result: imageUrl });
       } else if (activeTab === GenerationMode.Analyze) {
         const text = await analyzeImage({ prompt: analyzePrompt, sourceImage, language });
         setResult({ loading: false, text });
-        addToHistory({ type: 'analysis', prompt: 'Image Analysis', result: text });
+        addToHistory({ type: 'analysis', prompt: 'Analysis', result: text });
       }
     } catch (err: any) {
-      setResult({ loading: false, error: err.message });
+      handleError(err);
     }
   };
 
   return (
-    <div className="min-h-screen pb-12 font-sans selection:bg-violet-500/30">
+    <div className="min-h-screen pb-12">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         <AppHeader onBack={onBack} title={t('home.graphic.title')} subtitle={t('graphic.subtitle')} />
-
-        <div className="flex justify-center mb-10">
-          <div className="w-full max-w-2xl bg-slate-900/40 p-2 rounded-[2rem] border border-slate-800/40 shadow-2xl backdrop-blur-md">
-            <div className="flex flex-wrap sm:flex-nowrap gap-1.5">
-              {tabs.map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => { setActiveTab(tab.id); setResult({ loading: false }); }}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                    activeTab === tab.id 
-                      ? 'bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-xl shadow-violet-900/20' 
-                      : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/40'
-                  }`}
-                >
-                  <span className="material-icons-round text-lg">{tab.icon}</span>
-                  <span className="hidden xs:inline">{tab.label}</span>
-                </button>
-              ))}
-            </div>
+        <div className="flex justify-center mb-8">
+          <div className="bg-slate-900/60 p-1.5 rounded-2xl border border-slate-800 flex gap-1">
+            {[GenerationMode.Generate, GenerationMode.Collage, GenerationMode.SimplePost, GenerationMode.Edit, GenerationMode.Analyze].map(tab => (
+              <button key={tab} onClick={() => setActiveTab(tab)} className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${activeTab === tab ? 'bg-violet-600 text-white' : 'text-slate-400 hover:text-white'}`}>
+                {t(`tab.${tab}`)}
+              </button>
+            ))}
           </div>
         </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
-          <div className="bg-slate-900/40 border border-slate-800/60 rounded-[2.5rem] p-8 md:p-10 shadow-2xl backdrop-blur-sm">
-            <div className="flex items-center justify-between mb-10">
-               <div className="flex items-center gap-4 text-slate-200">
-                  <div className="w-10 h-10 rounded-2xl bg-violet-500/10 flex items-center justify-center border border-violet-500/20 shadow-[0_0_20px_rgba(139,92,246,0.1)]">
-                    <span className="material-icons-round text-violet-400">tune</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <h2 className="font-black text-[10px] uppercase tracking-[0.3em] text-slate-500">{t('section.config')}</h2>
-                    <span className="text-xs font-bold text-violet-400 uppercase tracking-widest">{activeTabLabel}</span>
-                  </div>
-               </div>
-            </div>
-
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-8 shadow-xl">
             {activeTab === GenerationMode.Generate && (
-              <div className="space-y-8">
-                <TextArea label={t('label.prompt')} placeholder="Describe your vision..." rows={4} value={genPrompt} onChange={(e) => setGenPrompt(e.target.value)} />
-                <MultiFileUpload images={referenceImages} onImagesChange={setReferenceImages} maxImages={3} />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Select label={t('label.style')} icon="palette" options={Object.keys(STYLE_HIERARCHY).map(k => ({ label: k, value: k }))} value={genMainStyle} onChange={handleMainStyleChange} />
-                  <Select label={t('label.size')} icon="aspect_ratio" groupedOptions={sizeOptions} value={genSize} onChange={(e) => setGenSize(e.target.value)} />
+              <div className="space-y-6">
+                <TextArea label={t('label.prompt')} value={genPrompt} onChange={e => setGenPrompt(e.target.value)} rows={4} />
+                <div className="flex flex-col gap-2">
+                  <MultiFileUpload images={referenceImages} onImagesChange={setReferenceImages} maxImages={3} />
+                  {referenceImages.length > 0 && (
+                    <Button variant="outline" icon="auto_fix_high" className="text-xs py-1" onClick={() => handleImageToPrompt(referenceImages[0])}>
+                      {t('btn.image_to_prompt')}
+                    </Button>
+                  )}
                 </div>
-                <div className="pt-4">
-                  <Button onClick={handleAction} loading={result.loading} className="w-full !py-5">
-                    <span className="font-black uppercase tracking-[0.2em] text-xs">{t('btn.generate')}</span>
-                  </Button>
+                <div className="grid grid-cols-2 gap-4">
+                  <Select label={t('label.style')} options={Object.keys(STYLE_HIERARCHY).map(s => ({ label: s, value: s }))} value={genMainStyle} onChange={handleMainStyleChange} />
+                  <Select label={t('label.size')} groupedOptions={sizeOptions} value={genSize} onChange={e => setGenSize(e.target.value)} />
+                  <Select label={t('label.color')} options={COLOR_GRADE_OPTIONS} value={genColor} onChange={e => setGenColor(e.target.value)} />
+                  <Select label={t('label.lighting')} options={LIGHTING_OPTIONS} value={genLighting} onChange={e => setGenLighting(e.target.value)} />
                 </div>
+                <Button onClick={handleAction} loading={result.loading} className="w-full">{t('btn.generate')}</Button>
               </div>
             )}
-
-            {activeTab === GenerationMode.Edit && (
-              <div className="space-y-8">
-                <FileUpload currentImage={sourceImage} onFileSelect={setSourceImage} />
-                <TextArea label={t('label.edit_instructions')} rows={3} value={editPrompt} onChange={(e) => setEditPrompt(e.target.value)} />
-                <Button onClick={handleAction} loading={result.loading} className="w-full !py-5">
-                  <span className="font-black uppercase tracking-[0.2em] text-xs">{t('btn.apply_edit')}</span>
-                </Button>
-              </div>
-            )}
-
-            {activeTab === GenerationMode.Analyze && (
-               <div className="space-y-8">
-                 <FileUpload currentImage={sourceImage} onFileSelect={setSourceImage} />
-                 <TextArea label={t('label.question')} rows={2} value={analyzePrompt} onChange={(e) => setAnalyzePrompt(e.target.value)} />
-                 <Button onClick={handleAction} loading={result.loading} className="w-full !py-5">
-                    <span className="font-black uppercase tracking-[0.2em] text-xs">{t('btn.analyze')}</span>
-                 </Button>
-               </div>
-            )}
-            
             {activeTab === GenerationMode.Collage && (
-              <div className="space-y-8">
+              <div className="space-y-6">
                 <MultiFileUpload images={collageImages} onImagesChange={setCollageImages} maxImages={6} />
-                <TextArea label={t('label.prompt')} rows={2} value={collagePrompt} onChange={(e) => setCollagePrompt(e.target.value)} />
-                <Button onClick={handleAction} loading={result.loading} className="w-full !py-5">
-                  <span className="font-black uppercase tracking-[0.2em] text-xs">{t('btn.generate')}</span>
-                </Button>
+                <div className="grid grid-cols-2 gap-4">
+                  <Select label={t('label.layout')} options={COLLAGE_LAYOUTS} value={collageLayout} onChange={e => setCollageLayout(e.target.value)} />
+                  <Select label={t('label.theme')} options={SIMPLE_POST_THEMES} value={collageTheme} onChange={e => setCollageTheme(e.target.value)} />
+                </div>
+                <TextArea label={t('label.prompt')} value={collagePrompt} onChange={e => setCollagePrompt(e.target.value)} rows={2} />
+                <Button onClick={handleAction} loading={result.loading} className="w-full">{t('btn.generate')}</Button>
               </div>
             )}
-
             {activeTab === GenerationMode.SimplePost && (
-              <div className="space-y-8">
-                <Input label={t('label.headline')} value={simpleHeadline} onChange={(e) => setSimpleHeadline(e.target.value)} />
-                <TextArea label={t('label.content')} value={simpleContent} onChange={(e) => setSimpleContent(e.target.value)} />
-                <Button onClick={handleAction} loading={result.loading} className="w-full !py-5">
-                  <span className="font-black uppercase tracking-[0.2em] text-xs">{t('btn.generate')}</span>
-                </Button>
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <FileUpload label={t('label.logo')} currentImage={simpleLogo} onFileSelect={setSimpleLogo} onFileRemove={() => setSimpleLogo(null)} />
+                  <FileUpload label={t('label.bg_image')} currentImage={simpleBgImage} onFileSelect={setSimpleBgImage} onFileRemove={() => setSimpleBgImage(null)} />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <Input label={t('label.headline')} value={simpleHeadline} onChange={e => setSimpleHeadline(e.target.value)} />
+                  <Input label={t('label.tagline')} value={simpleTagline} onChange={e => setSimpleTagline(e.target.value)} />
+                </div>
+                <TextArea label={t('label.content')} value={simpleContent} onChange={e => setSimpleContent(e.target.value)} rows={2} />
+                <div className="grid grid-cols-2 gap-4">
+                  <Input label={t('label.address')} value={simpleAddress} onChange={e => setSimpleAddress(e.target.value)} />
+                  <Select label={t('label.theme')} options={SIMPLE_POST_THEMES} value={simplePostTheme} onChange={e => setSimplePostTheme(e.target.value)} />
+                </div>
+                <Button onClick={handleAction} loading={result.loading} className="w-full">{t('btn.generate')}</Button>
+              </div>
+            )}
+            {activeTab === GenerationMode.Edit && (
+              <div className="space-y-6">
+                <FileUpload currentImage={sourceImage} onFileSelect={setSourceImage} onFileRemove={() => setSourceImage(null)} />
+                {sourceImage && (
+                  <Button variant="outline" icon="auto_fix_high" className="text-xs py-1" onClick={() => handleImageToPrompt(sourceImage)}>
+                    {t('btn.image_to_prompt')}
+                  </Button>
+                )}
+                <TextArea label={t('label.edit_instructions')} value={editPrompt} onChange={e => setEditPrompt(e.target.value)} rows={3} />
+                <Button onClick={handleAction} loading={result.loading} className="w-full">{t('btn.apply_edit')}</Button>
+              </div>
+            )}
+            {activeTab === GenerationMode.Analyze && (
+              <div className="space-y-6">
+                <FileUpload currentImage={sourceImage} onFileSelect={setSourceImage} onFileRemove={() => setSourceImage(null)} />
+                <TextArea label={t('label.question')} value={analyzePrompt} onChange={e => setAnalyzePrompt(e.target.value)} />
+                <Button onClick={handleAction} loading={result.loading} className="w-full">{t('btn.analyze')}</Button>
               </div>
             )}
           </div>
-
-          <div className="h-full min-h-[600px]">
-            <GeneratedResultView result={result} title={activeTab === GenerationMode.Analyze ? t('result.title.analyze') : t('result.title.generate')} />
-          </div>
+          <GeneratedResultView result={result} title={t(`result.title.${activeTab === GenerationMode.Analyze ? 'analyze' : 'generate'}`)} onClear={() => setResult({ loading: false })} />
         </div>
       </div>
     </div>

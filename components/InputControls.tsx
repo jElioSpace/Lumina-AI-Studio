@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -6,14 +7,14 @@ interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
 }
 
 export const TextArea: React.FC<TextAreaProps> = ({ label, className = '', ...props }) => (
-  <div className="mb-4">
+  <div className="mb-4 w-full box-border">
     {label && (
       <label className="block text-[11px] md:text-xs font-black text-slate-300 uppercase tracking-widest mb-2.5 ml-1">
         {label}
       </label>
     )}
     <textarea
-      className={`w-full bg-slate-950/50 border-2 border-slate-800 rounded-2xl p-4 text-slate-100 placeholder-slate-700 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/30 outline-none transition-all resize-none ${className}`}
+      className={`w-full bg-slate-950/50 border-2 border-slate-800 rounded-2xl p-4 text-slate-100 placeholder-slate-700 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/30 outline-none transition-all resize-none box-border ${className}`}
       {...props}
     />
   </div>
@@ -24,14 +25,14 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const Input: React.FC<InputProps> = ({ label, className = '', ...props }) => (
-  <div className="mb-4">
+  <div className="mb-4 w-full box-border">
     {label && (
       <label className="block text-[11px] md:text-xs font-black text-slate-300 uppercase tracking-widest mb-2.5 ml-1">
         {label}
       </label>
     )}
     <input
-      className={`w-full bg-slate-950/50 border-2 border-slate-800 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-700 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/30 outline-none transition-all ${className}`}
+      className={`w-full bg-slate-950/50 border-2 border-slate-800 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-700 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/30 outline-none transition-all box-border ${className}`}
       {...props}
     />
   </div>
@@ -45,20 +46,20 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
 }
 
 export const Select: React.FC<SelectProps> = ({ label, icon, options, groupedOptions, className = '', ...props }) => (
-  <div className="mb-4">
+  <div className="mb-4 w-full box-border">
     {label && (
       <label className="block text-[11px] md:text-xs font-black text-slate-300 uppercase tracking-widest mb-2.5 ml-1">
         {label}
       </label>
     )}
-    <div className="relative">
+    <div className="relative w-full box-border">
       {icon && (
         <span className="material-icons-round absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-lg pointer-events-none">
           {icon}
         </span>
       )}
       <select
-        className={`w-full appearance-none bg-slate-800/50 border-2 border-slate-700 text-slate-200 rounded-xl py-3 pr-10 ${icon ? 'pl-10' : 'pl-4'} focus:border-violet-500 focus:ring-1 focus:ring-violet-500/30 outline-none transition-all cursor-pointer hover:bg-slate-800 ${className}`}
+        className={`w-full appearance-none bg-slate-800/50 border-2 border-slate-700 text-slate-200 rounded-xl py-3 pr-10 ${icon ? 'pl-10' : 'pl-4'} focus:border-violet-500 focus:ring-1 focus:ring-violet-500/30 outline-none transition-all cursor-pointer hover:bg-slate-800 box-border ${className}`}
         {...props}
       >
         {options && options.map(opt => (
@@ -81,9 +82,10 @@ export const Select: React.FC<SelectProps> = ({ label, icon, options, groupedOpt
 
 export const FileUpload: React.FC<{ 
   onFileSelect: (file: string) => void; 
+  onFileRemove?: () => void;
   currentImage: string | null;
   label?: string;
-}> = ({ onFileSelect, currentImage, label }) => {
+}> = ({ onFileSelect, onFileRemove, currentImage, label }) => {
   const { t } = useLanguage();
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -98,11 +100,22 @@ export const FileUpload: React.FC<{
   };
 
   return (
-    <div className="mb-6">
-      <label className="block text-[11px] md:text-xs font-black text-slate-300 uppercase tracking-widest mb-2.5 ml-1">
-        {label || t('upload.label')}
-      </label>
-      <div className="relative w-full h-36 border-2 border-dashed border-slate-700 rounded-3xl hover:border-violet-500/50 transition-colors bg-slate-950/50 group overflow-hidden">
+    <div className="mb-6 w-full box-border">
+      <div className="flex justify-between items-center mb-2.5 ml-1">
+        <label className="block text-[11px] md:text-xs font-black text-slate-300 uppercase tracking-widest">
+          {label || t('upload.label')}
+        </label>
+        {currentImage && onFileRemove && (
+          <button 
+            onClick={onFileRemove}
+            className="text-[9px] font-black text-red-400 uppercase tracking-widest hover:text-red-300 transition-colors flex items-center gap-1"
+          >
+            <span className="material-icons-round text-xs">delete</span>
+            {t('upload.remove')}
+          </button>
+        )}
+      </div>
+      <div className="relative w-full h-36 border-2 border-dashed border-slate-700 rounded-3xl hover:border-violet-500/50 transition-colors bg-slate-950/50 group overflow-hidden box-border">
         <input 
           type="file" 
           accept="image/*" 
@@ -119,7 +132,7 @@ export const FileUpload: React.FC<{
         )}
         
         {currentImage && (
-           <div className="absolute inset-0 flex items-center justify-center">
+           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <span className="bg-black/60 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest text-white backdrop-blur-md border border-white/10">{t('upload.replace')}</span>
            </div>
         )}
@@ -164,7 +177,7 @@ export const MultiFileUpload: React.FC<{
   };
 
   return (
-    <div className="mb-6">
+    <div className="mb-6 w-full box-border">
       <label className="block text-[11px] md:text-xs font-black text-slate-300 uppercase tracking-widest mb-2.5 ml-1 flex justify-between">
         <span>{t('upload.ref_label')}</span>
         <span className="text-slate-500 font-mono">{images.length} / {maxImages}</span>
@@ -172,7 +185,7 @@ export const MultiFileUpload: React.FC<{
       
       <div className="grid grid-cols-3 gap-3">
         {images.map((img, idx) => (
-          <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden border-2 border-slate-700 bg-slate-950 group">
+          <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden border-2 border-slate-700 bg-slate-950 group box-border">
             <img src={img} alt={`Ref ${idx}`} className="w-full h-full object-cover" />
             <button 
               onClick={() => removeImage(idx)}
@@ -184,7 +197,7 @@ export const MultiFileUpload: React.FC<{
         ))}
         
         {images.length < maxImages && (
-          <div className="relative aspect-square border-2 border-dashed border-slate-700 rounded-2xl hover:border-violet-500/50 transition-colors bg-slate-950/50 flex flex-col items-center justify-center text-slate-500 hover:text-violet-400 cursor-pointer">
+          <div className="relative aspect-square border-2 border-dashed border-slate-700 rounded-2xl hover:border-violet-500/50 transition-colors bg-slate-950/50 flex flex-col items-center justify-center text-slate-500 hover:text-violet-400 cursor-pointer box-border">
              <input 
                 type="file" 
                 accept="image/*" 

@@ -12,31 +12,51 @@ export const STYLE_HIERARCHY: Record<string, string[]> = {
   'Atmospheric': ['None', 'Ethereal', 'Dark Fantasy', 'Cyberpunk', 'Steampunk', 'Surrealism']
 };
 
-export const MOOD_MAP = {
-  'None': 'opt.none',
-  'Calm': 'mood.calm',
-  'Energetic': 'mood.energetic',
-  'Dark': 'mood.dark',
-  'Playful': 'mood.playful',
-  'Elegant': 'mood.elegant',
-  'Cozy': 'mood.cozy',
-  'Professional': 'mood.professional',
-  'Ethereal': 'mood.ethereal',
-  'Melancholic': 'mood.melancholic',
-  'Romantic': 'mood.romantic',
-};
+export const COLOR_GRADE_OPTIONS = [
+  { label: 'None', value: 'None' },
+  { label: 'Vibrant', value: 'Vibrant' },
+  { label: 'Muted', value: 'Muted' },
+  { label: 'Warm', value: 'Warm' },
+  { label: 'Cool', value: 'Cool' },
+  { label: 'Sepia', value: 'Sepia' },
+  { label: 'Black & White', value: 'Black & White' },
+  { label: 'Teal & Orange', value: 'Teal & Orange' },
+  { label: 'Technicolor', value: 'Technicolor' },
+  { label: 'Kodak Portra', value: 'Kodak Portra' },
+  { label: 'Fujifilm Pro', value: 'Fujifilm Pro' }
+];
 
-export const LIGHTING_MAP = {
-  'Natural': 'light.natural',
-  'Studio Soft Light': 'light.studio',
-  'Cinematic Soft Light': 'light.cinematic',
-  'Strong Contrast': 'light.rembrandt',
-  'Warm Golden Light': 'light.golden',
-  'Glow / Neon Accent Light': 'light.neon',
-  'Ambient Lighting': 'light.ambient',
-  'Low Key Lighting': 'light.lowkey',
-  'Flat Lighting': 'light.flat',
-};
+export const LIGHTING_OPTIONS = [
+  { label: 'Natural', value: 'Natural' },
+  { label: 'Studio Soft Light', value: 'Studio Soft Light' },
+  { label: 'Cinematic Soft Light', value: 'Cinematic Soft Light' },
+  { label: 'Rembrandt', value: 'Strong Contrast' },
+  { label: 'Golden Hour', value: 'Warm Golden Light' },
+  { label: 'Neon Accent', value: 'Glow / Neon Accent Light' },
+  { label: 'Moonlight', value: 'Soft Moonlight' }
+];
+
+export const COLLAGE_LAYOUTS = [
+  { label: 'Balanced Grid', value: 'Balanced Grid' },
+  { label: 'Vertical Stack', value: 'Vertical Stack' },
+  { label: 'Horizontal Stack', value: 'Horizontal Stack' },
+  { label: 'Creative Grid', value: 'Creative Grid' },
+  { label: 'Asymmetric Mix', value: 'Asymmetric Mix' },
+  { label: 'Overlap Collage', value: 'Overlap Collage' },
+  { label: 'Circular Radial', value: 'Circular Radial' }
+];
+
+export const SIMPLE_POST_THEMES = [
+  { label: 'Clean Minimalist', value: 'Clean Minimalist' },
+  { label: 'Modern Corporate', value: 'Modern Corporate' },
+  { label: 'Luxury & Gold', value: 'Luxury & Gold' },
+  { label: 'Bold Typography', value: 'Bold Typography' },
+  { label: 'Pastel Dream', value: 'Pastel Dream' },
+  { label: 'Cyberpunk Industrial', value: 'Cyberpunk Industrial' },
+  { label: 'Nature Inspired', value: 'Nature Inspired' },
+  { label: 'Abstract Geometric', value: 'Abstract Geometric' },
+  { label: 'Street Style', value: 'Street Style' }
+];
 
 // Content AI Options
 export const PERSONA_MAP = {

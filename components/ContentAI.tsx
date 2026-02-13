@@ -54,6 +54,8 @@ interface ContentAIProps {
   initialResult?: string;
 }
 
+const STORAGE_KEY = 'lumina_content_state';
+
 export const ContentAI: React.FC<ContentAIProps> = ({ 
   onBack, 
   onRequestImageGeneration, 
@@ -63,24 +65,56 @@ export const ContentAI: React.FC<ContentAIProps> = ({
   const { t, language } = useLanguage();
   const { addToHistory } = useHistory();
   
-  // Form State
+  // Form State with persistence
   const [pageName, setPageName] = useState('');
   const [creatorPersona, setCreatorPersona] = useState('General');
-  const [topic, setTopic] = useState(initialTopic || '');
+  const [topic, setTopic] = useState('');
   const [platform, setPlatform] = useState('Facebook');
   const [targetAudience, setTargetAudience] = useState('');
   const [tone, setTone] = useState('Professional');
   const [length, setLength] = useState('Medium');
   const [useEmojis, setUseEmojis] = useState(true);
-  
-  // References
   const [referenceUrls, setReferenceUrls] = useState<string[]>([]);
   const [newUrl, setNewUrl] = useState('');
   const [referenceImages, setReferenceImages] = useState<string[]>([]);
-  
   const [additionalContext, setAdditionalContext] = useState('');
   
   const [result, setResult] = useState<GeneratedResult>({ loading: false });
+
+  // Persistence: Load
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        const state = JSON.parse(saved);
+        setPageName(state.pageName || '');
+        setCreatorPersona(state.creatorPersona || 'General');
+        setTopic(state.topic || '');
+        setPlatform(state.platform || 'Facebook');
+        setTargetAudience(state.targetAudience || '');
+        setTone(state.tone || 'Professional');
+        setLength(state.length || 'Medium');
+        setUseEmojis(state.useEmojis ?? true);
+        setReferenceUrls(state.referenceUrls || []);
+        setReferenceImages(state.referenceImages || []);
+        setAdditionalContext(state.additionalContext || '');
+      } catch (e) {
+        console.error("Failed to load content state", e);
+      }
+    }
+  }, []);
+
+  // Persistence: Save
+  useEffect(() => {
+    const state = {
+      pageName, creatorPersona, topic, platform, targetAudience, tone, length,
+      useEmojis, referenceUrls, referenceImages, additionalContext
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }, [
+    pageName, creatorPersona, topic, platform, targetAudience, tone, length,
+    useEmojis, referenceUrls, referenceImages, additionalContext
+  ]);
 
   // Load initial result if provided (from History)
   useEffect(() => {
@@ -140,6 +174,14 @@ export const ContentAI: React.FC<ContentAIProps> = ({
     setPageName("Lumina Demo");
   };
 
+  const handleError = (err: any) => {
+    const msg = err.message || String(err);
+    if (msg.includes("Requested entity was not found")) {
+      window.dispatchEvent(new CustomEvent('reset-api-key'));
+    }
+    setResult({ loading: false, error: msg });
+  };
+
   const handleGenerate = async () => {
     if (!topic) return;
     setResult({ loading: true, text: undefined, error: undefined });
@@ -161,7 +203,7 @@ export const ContentAI: React.FC<ContentAIProps> = ({
       setResult({ loading: false, text });
       addToHistory({ type: 'text', prompt: `${platform}: ${topic.substring(0, 30)}...`, result: text });
     } catch (err: any) {
-      setResult({ loading: false, error: err.message });
+      handleError(err);
     }
   };
 
@@ -191,7 +233,7 @@ export const ContentAI: React.FC<ContentAIProps> = ({
         }));
 
       } catch (err: any) {
-        setResult(prev => ({ ...prev, loading: false, error: err.message }));
+        handleError(err);
       }
   };
 
@@ -204,7 +246,7 @@ export const ContentAI: React.FC<ContentAIProps> = ({
   };
 
   return (
-    <div className="min-h-screen pb-12 font-sans selection:bg-violet-500/30">
+    <div className="min-h-screen pb-12 font-sans selection:bg-violet-500/30 overflow-x-hidden">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         <AppHeader onBack={onBack} title={t('content.title')} subtitle={t('content.subtitle')} />
 
@@ -294,13 +336,13 @@ export const ContentAI: React.FC<ContentAIProps> = ({
               </div>
 
               {/* Row 6: Reference URLs */}
-              <div>
+              <div className="overflow-hidden">
                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">
                    {t('label.referenceUrls')}
                  </label>
-                 <div className="flex gap-2 mb-3">
+                 <div className="flex flex-col xs:flex-row gap-2 mb-3">
                    <input
-                     className="flex-1 bg-slate-950/50 border-2 border-slate-800 rounded-xl px-4 py-2.5 text-slate-200 placeholder-slate-600 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 outline-none transition-all"
+                     className="flex-1 min-w-0 bg-slate-950/50 border-2 border-slate-800 rounded-xl px-4 py-2.5 text-slate-200 placeholder-slate-600 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 outline-none transition-all text-sm"
                      placeholder="https://..."
                      value={newUrl}
                      onChange={(e) => setNewUrl(e.target.value)}
@@ -308,7 +350,7 @@ export const ContentAI: React.FC<ContentAIProps> = ({
                    />
                    <button 
                      onClick={addUrl}
-                     className="px-4 py-2 bg-slate-800 text-violet-400 font-medium rounded-xl hover:bg-slate-700 hover:text-violet-300 transition-colors"
+                     className="px-6 py-2.5 bg-slate-800 text-violet-400 font-bold rounded-xl hover:bg-slate-700 hover:text-violet-300 transition-colors shrink-0 text-xs md:text-sm uppercase tracking-wider whitespace-nowrap"
                    >
                      {t('btn.addUrl')}
                    </button>
@@ -317,8 +359,8 @@ export const ContentAI: React.FC<ContentAIProps> = ({
                    <ul className="space-y-2">
                      {referenceUrls.map((url, idx) => (
                        <li key={idx} className="flex items-center justify-between bg-slate-800/50 px-3 py-2 rounded-lg border border-slate-700/50">
-                         <span className="text-sm text-slate-300 truncate max-w-[90%]">{url}</span>
-                         <button onClick={() => removeUrl(idx)} className="text-slate-500 hover:text-red-400">
+                         <span className="text-sm text-slate-300 truncate pr-2">{url}</span>
+                         <button onClick={() => removeUrl(idx)} className="text-slate-500 hover:text-red-400 shrink-0 p-1">
                            <span className="material-icons-round text-sm">close</span>
                          </button>
                        </li>
@@ -360,7 +402,7 @@ export const ContentAI: React.FC<ContentAIProps> = ({
             
             <div className="mt-8 pt-6 border-t border-slate-800 text-center">
               <p className="text-xs text-slate-500">
-                Powered by Google Gemini 2.5 Flash Series
+                Powered by Google Gemini 3.0 Flash Preview
               </p>
             </div>
           </div>

@@ -4,6 +4,7 @@ import { GraphicAI } from './components/GraphicAI';
 import { ContentAI } from './components/ContentAI';
 import { PromptEngineer } from './components/PromptEngineer';
 import { HistoryDrawer } from './components/HistoryDrawer';
+import { ApiKeyChecker } from './components/ApiKeyChecker';
 import { useLanguage } from './contexts/LanguageContext';
 import { HistoryItem } from './types';
 
@@ -12,6 +13,7 @@ type AppView = 'home' | 'graphic' | 'content' | 'prompt';
 const App: React.FC = () => {
   const [view, setView] = useState<AppView>('home');
   const [graphicPrompt, setGraphicPrompt] = useState<string>('');
+  const [isKeySelected, setIsKeySelected] = useState(false);
   
   // State for re-hydrating from History
   const [initialGraphicResult, setInitialGraphicResult] = useState<string>('');
@@ -145,6 +147,8 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen font-sans selection:bg-violet-500/30 flex flex-col relative overflow-hidden bg-[#0b1120]">
+      <ApiKeyChecker onKeySelected={() => setIsKeySelected(true)} />
+      
       <div className="max-w-7xl mx-auto px-4 md:px-6 w-full flex-grow flex flex-col">
         {view === 'home' && <AppHeader subtitle={t('app.subtitle')} />}
         {renderContent()}
