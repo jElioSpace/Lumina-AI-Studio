@@ -1,6 +1,14 @@
 import { GoogleGenAI } from "@google/genai";
 import { ImageGenerationConfig, ImageEditConfig, ImageAnalyzeConfig, ContentGenerationConfig, SimplePostConfig, ImageCollageConfig } from "../types";
 
+const getAIInstance = () => {
+  const apiKey = process.env.API_KEY;
+  if (!apiKey || apiKey.trim() === "") {
+    throw new Error("API Key is not configured. Please select a valid API key to continue.");
+  }
+  return new GoogleGenAI({ apiKey });
+};
+
 const getSizeConfig = (sizeInput: string): { aspectRatio: string | undefined } => {
   if (!sizeInput || sizeInput === 'original') return { aspectRatio: undefined };
   const nativeRatios = ["1:1", "16:9", "9:16", "4:3", "3:4"];
@@ -15,7 +23,7 @@ const getSizeConfig = (sizeInput: string): { aspectRatio: string | undefined } =
 };
 
 export const describeImageForPrompt = async (imgBase64: string): Promise<string> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = getAIInstance();
   const base64Data = imgBase64.split(',')[1];
   const mimeType = imgBase64.split(';')[0].split(':')[1];
   const prompt = "Act as an expert Prompt Engineer. Describe this image in extreme detail for use as a prompt in an AI Image Generator. Include subjects, environment, lighting, camera settings, art style, and emotional mood. Provide ONLY the final prompt text.";
@@ -31,7 +39,7 @@ export const describeImageForPrompt = async (imgBase64: string): Promise<string>
 };
 
 export const generateImage = async (config: ImageGenerationConfig): Promise<string> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = getAIInstance();
   const { aspectRatio } = getSizeConfig(config.size);
   let finalPrompt = config.prompt;
   if (config.referenceImages?.length > 0) finalPrompt = `[Structure: Use reference images as composition guides] ${finalPrompt}`;
@@ -63,7 +71,7 @@ export const generateImage = async (config: ImageGenerationConfig): Promise<stri
 };
 
 export const generateSimpleSocialPost = async (config: SimplePostConfig): Promise<string> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = getAIInstance();
   const { aspectRatio } = getSizeConfig(config.size);
   const formattedCTAs = config.ctas.filter(c => c.value.trim() !== '').map(c => `${c.type === 'phone' ? 'Ph:' : 'Email:'} ${c.value}`).join(' | ');
   
@@ -102,7 +110,7 @@ export const generateSimpleSocialPost = async (config: SimplePostConfig): Promis
 };
 
 export const generateCollage = async (config: ImageCollageConfig): Promise<string> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = getAIInstance();
   const { aspectRatio } = getSizeConfig(config.size);
   const parts: any[] = config.images.map(img => ({
     inlineData: { data: img.split(',')[1], mimeType: img.split(';')[0].split(':')[1] }
@@ -123,7 +131,7 @@ export const generateCollage = async (config: ImageCollageConfig): Promise<strin
 };
 
 export const editImage = async (config: ImageEditConfig): Promise<string> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = getAIInstance();
   const { aspectRatio } = getSizeConfig(config.size || 'original');
   const base64 = config.sourceImage!.split(',')[1];
   const mime = config.sourceImage!.split(';')[0].split(':')[1];
@@ -142,7 +150,7 @@ export const editImage = async (config: ImageEditConfig): Promise<string> => {
 };
 
 export const analyzeImage = async (config: ImageAnalyzeConfig & { language?: string }): Promise<string> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = getAIInstance();
   const base64 = config.sourceImage!.split(',')[1];
   const mime = config.sourceImage!.split(';')[0].split(':')[1];
   const prompt = `Act as an expert Art Director. Analyze this image. Context: ${config.prompt || 'General review'}. ${config.language === 'mm' ? 'Reply in Myanmar language.' : 'Reply in English.'}`;
@@ -158,7 +166,7 @@ export const analyzeImage = async (config: ImageAnalyzeConfig & { language?: str
 };
 
 export const generateTextContent = async (config: ContentGenerationConfig & { language?: string }): Promise<string> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = getAIInstance();
   const parts: any[] = (config.referenceImages || []).map(img => ({
     inlineData: { data: img.split(',')[1], mimeType: img.split(';')[0].split(':')[1] }
   }));
@@ -175,7 +183,7 @@ export const generateTextContent = async (config: ContentGenerationConfig & { la
 };
 
 export const craftPrompt = async (draft: string, target: 'image' | 'text', complexity: string, baseInstruction?: string, referenceImages: string[] = []): Promise<string> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = getAIInstance();
   const parts: any[] = referenceImages.map(img => ({
     inlineData: { data: img.split(',')[1], mimeType: img.split(';')[0].split(':')[1] }
   }));

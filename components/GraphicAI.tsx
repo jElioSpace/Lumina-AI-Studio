@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { AppHeader } from './AppHeader';
 import { Button } from './Button';
@@ -149,8 +148,7 @@ export const GraphicAI: React.FC<GraphicAIProps> = ({ onBack, initialPrompt, ini
 
   const handleError = (err: any) => {
     const msg = err.message || String(err);
-    // Standardized check for unauthorized or missing session
-    if (msg.includes("Requested entity was not found") || msg.toLowerCase().includes("unauthorized") || msg.includes("401")) {
+    if (msg.includes("Requested entity was not found") || msg.toLowerCase().includes("unauthorized") || msg.includes("401") || msg.includes("API Key is not configured")) {
       window.dispatchEvent(new CustomEvent('reset-api-key'));
     }
     setResult({ loading: false, error: msg });
@@ -205,22 +203,20 @@ export const GraphicAI: React.FC<GraphicAIProps> = ({ onBack, initialPrompt, ini
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         <AppHeader onBack={onBack} title={t('home.graphic.title')} subtitle={t('graphic.subtitle')} />
         
-        {/* Navigation Tabs Bar */}
+        {/* Navigation Tabs Bar - Fixed design to match "FIX" image */}
         <div className="w-full flex justify-center mb-10">
-          <div className="flex bg-[#1e293b]/40 backdrop-blur-md rounded-[2.5rem] p-1.5 border border-slate-800/60 shadow-2xl w-full max-w-4xl overflow-x-auto scrollbar-hide">
+          <div className="flex bg-[#0f172a] rounded-3xl p-1 border border-slate-800 shadow-2xl w-full max-w-4xl overflow-x-auto scrollbar-hide">
             {tabs.map(tab => (
               <button 
                 key={tab.id} 
                 onClick={() => setActiveTab(tab.id)} 
-                className={`flex-1 min-w-[100px] flex flex-col items-center justify-center px-4 py-3.5 rounded-[2rem] text-[10px] md:text-[11px] font-black uppercase tracking-widest transition-all duration-500 whitespace-nowrap ${
+                className={`flex-1 min-w-[110px] flex items-center justify-center px-4 py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all duration-300 whitespace-nowrap ${
                   activeTab === tab.id 
-                    ? 'bg-[#8b5cf6] text-white shadow-[0_10px_25px_rgba(139,92,246,0.3)] ring-1 ring-white/20' 
-                    : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/30'
+                    ? 'bg-[#8b5cf6] text-white shadow-xl ring-1 ring-white/10' 
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
                 }`}
               >
-                {tab.label.split(' ').map((part, i) => (
-                  <span key={i} className="leading-tight">{part}</span>
-                ))}
+                {tab.label}
               </button>
             ))}
           </div>
@@ -303,7 +299,7 @@ export const GraphicAI: React.FC<GraphicAIProps> = ({ onBack, initialPrompt, ini
                     {t('btn.image_to_prompt')}
                   </Button>
                 )}
-                <TextArea label={t('edit_instructions')} value={editPrompt} onChange={e => setEditPrompt(e.target.value)} rows={3} placeholder="Describe the changes you want (e.g., Change hair color to blue)..." />
+                <TextArea label={t('label.edit_instructions')} value={editPrompt} onChange={e => setEditPrompt(e.target.value)} rows={3} placeholder="Describe the changes you want (e.g., Change hair color to blue)..." />
                 <Button onClick={handleAction} loading={result.loading} className="w-full !py-5">
                    <span className="font-black uppercase tracking-[0.3em] text-xs">{t('btn.apply_edit')}</span>
                 </Button>
@@ -313,7 +309,7 @@ export const GraphicAI: React.FC<GraphicAIProps> = ({ onBack, initialPrompt, ini
             {activeTab === GenerationMode.Analyze && (
               <div className="space-y-8">
                 <FileUpload currentImage={sourceImage} onFileSelect={setSourceImage} onFileRemove={() => setSourceImage(null)} />
-                <TextArea label={t('question')} value={analyzePrompt} onChange={e => setAnalyzePrompt(e.target.value)} placeholder="Ask anything about the image (e.g., What are the main colors?)..." />
+                <TextArea label={t('label.question')} value={analyzePrompt} onChange={e => setAnalyzePrompt(e.target.value)} placeholder="Ask anything about the image (e.g., What are the main colors?)..." />
                 <Button onClick={handleAction} loading={result.loading} className="w-full !py-5">
                   <span className="font-black uppercase tracking-[0.3em] text-xs">{t('btn.analyze')}</span>
                 </Button>
