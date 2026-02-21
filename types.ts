@@ -1,3 +1,4 @@
+
 export enum AspectRatio {
   Square = "1:1",
   Portrait34 = "3:4",
@@ -10,8 +11,7 @@ export enum GenerationMode {
   Generate = "generate",
   Edit = "edit",
   Analyze = "analyze",
-  SimplePost = "simple_post",
-  Collage = "collage"
+  SimplePost = "simple_post"
 }
 
 export interface ImageGenerationConfig {
@@ -29,14 +29,6 @@ export interface ImageGenerationConfig {
   referenceImages: string[]; // Up to 3 images
 }
 
-export interface ImageCollageConfig {
-  prompt: string;
-  images: string[]; // Up to 6 images
-  layout: string;
-  theme: string;
-  size: string;
-}
-
 export interface ImageEditConfig {
   prompt: string;
   sourceImage: string | null; // Base64
@@ -47,6 +39,15 @@ export interface ImageEditConfig {
 export interface ImageAnalyzeConfig {
   prompt: string;
   sourceImage: string | null; // Base64
+}
+
+// Added missing interface for collage generation
+export interface ImageCollageConfig {
+  images: string[];
+  layout: string;
+  theme: string;
+  size: string;
+  prompt?: string;
 }
 
 export interface SimplePostCTA {
@@ -63,7 +64,6 @@ export interface SimplePostConfig {
   address?: string;
   ctas: SimplePostCTA[];
   size: string;
-  // Added theme property to resolve 'theme' does not exist on type 'SimplePostConfig' errors
   theme?: string;
 }
 
@@ -94,4 +94,13 @@ export interface HistoryItem {
   prompt: string;
   result: string; // URL for image, Text content for text/analysis
   timestamp: number;
+}
+
+declare global {
+  interface Window {
+    aistudio: {
+      hasSelectedApiKey: () => Promise<boolean>;
+      openSelectKey: () => Promise<void>;
+    };
+  }
 }

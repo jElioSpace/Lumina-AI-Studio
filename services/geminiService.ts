@@ -1,12 +1,10 @@
+
 import { GoogleGenAI } from "@google/genai";
 import { ImageGenerationConfig, ImageEditConfig, ImageAnalyzeConfig, ContentGenerationConfig, SimplePostConfig, ImageCollageConfig } from "../types";
 
 const getAIInstance = () => {
-  const apiKey = process.env.API_KEY;
-  if (!apiKey || apiKey.trim() === "") {
-    throw new Error("API Key is not configured. Please select a valid API key to continue.");
-  }
-  return new GoogleGenAI({ apiKey });
+  // Rely exclusively on process.env.API_KEY as per coding guidelines
+  return new GoogleGenAI({ apiKey: process.env.API_KEY });
 };
 
 const getSizeConfig = (sizeInput: string): { aspectRatio: string | undefined } => {

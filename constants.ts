@@ -1,3 +1,4 @@
+
 // Graphic AI Options
 export const STYLE_HIERARCHY: Record<string, string[]> = {
   'None': ['None'],
@@ -66,16 +67,6 @@ export const FOCUS_OPTIONS = [
   { label: 'Sharp Focus', value: 'Sharp Focus' },
   { label: 'Soft Focus', value: 'Soft Focus' },
   { label: 'Motion Blur', value: 'Motion Blur' }
-];
-
-export const COLLAGE_LAYOUTS = [
-  { label: 'Balanced Grid', value: 'Balanced Grid' },
-  { label: 'Vertical Stack', value: 'Vertical Stack' },
-  { label: 'Horizontal Stack', value: 'Horizontal Stack' },
-  { label: 'Creative Grid', value: 'Creative Grid' },
-  { label: 'Asymmetric Mix', value: 'Asymmetric Mix' },
-  { label: 'Overlap Collage', value: 'Overlap Collage' },
-  { label: 'Circular Radial', value: 'Circular Radial' }
 ];
 
 export const SIMPLE_POST_THEMES = [

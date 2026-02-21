@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 export type Language = 'en' | 'mm';
@@ -17,22 +18,22 @@ const translations: Record<Language, Record<string, string>> = {
     'home.graphic.desc': 'Professional Image Generation, Editing & Analysis Studio.',
     'home.content.title': 'Content AI',
     'home.content.desc': 'Smart Copywriting, Summarization, and Text Generation.',
-    'home.prompt.title': 'Prompt Engineer',
+    'home.prompt.title': 'Prompt Lab',
     'home.prompt.desc': 'Persona-driven assistant for brainstorming and direct tasks.',
 
-    // Titles & Subtitles
+    // Titles & Subtitles (used for breadcrumbs)
+    'graphic.title': 'Graphic AI',
     'graphic.subtitle': 'Graphic AI Workspace',
     'content.title': 'Content AI',
     'content.subtitle': 'Content AI Workspace',
-    'prompt.title': 'Prompt Engineer',
-    'prompt.subtitle': 'Prompt Engineer Workspace',
+    'prompt.title': 'Prompt Lab',
+    'prompt.subtitle': 'Prompt Lab Workspace',
 
     // Tabs
     'tab.generate': 'Generate',
     'tab.edit': 'Edit',
     'tab.analyze': 'Analyze',
     'tab.simple_post': 'Simple Post',
-    'tab.collage': 'Collage',
 
     // Labels - Graphic AI
     'label.prompt': 'Description / Prompt',
@@ -49,7 +50,6 @@ const translations: Record<Language, Record<string, string>> = {
     'label.target_mood': 'New Atmosphere',
     'label.output_format': 'Format',
     'label.question': 'Analysis Focus',
-    'label.collage_images': 'Collage Images (Max 6)',
     'label.layout': 'Layout Style',
     'label.theme': 'Background Theme',
     
@@ -77,7 +77,7 @@ const translations: Record<Language, Record<string, string>> = {
     'label.referenceImages': 'Reference Images',
     'label.context': 'Additional Context',
 
-    // Labels - Prompt Engineer
+    // Labels - Prompt Lab
     'label.template': 'Assistant Template',
     'label.systemInstruction': 'System Instruction',
     'label.draft': 'Input / Draft',
@@ -188,12 +188,17 @@ const translations: Record<Language, Record<string, string>> = {
     'history.empty': 'မှတ်တမ်း မရှိသေးပါ။',
     'history.clear': 'မှတ်တမ်း ရှင်းမည်',
 
+    // Titles & Subtitles
+    'graphic.title': 'Graphic AI (ဂရပ်ဖစ်)',
+    'content.title': 'Content AI (စာပေ)',
+    'prompt.title': 'Prompt Lab (အမိန့်ပေးစာ)',
+
     // Home
     'home.graphic.title': 'Graphic AI (ဂရပ်ဖစ်)',
     'home.graphic.desc': 'ပရော်ဖက်ရှင်နယ် ပုံဖန်တီးခြင်း၊ ပြင်ဆင်ခြင်း နှင့် သုံးသပ်ခြင်း။',
     'home.content.title': 'Content AI (စာပေ)',
     'home.content.desc': 'ဆောင်းပါး၊ စာတို နှင့် စာပေအမျိုးမျိုး ဖန်တီးရန်။',
-    'home.prompt.title': 'Prompt Engineer (အမိန့်ပေးစာ)',
+    'home.prompt.title': 'Prompt Lab (အမိန့်ပေးစာ)',
     'home.prompt.desc': 'သာမန် စိတ်ကူးများကို အဆင့်မြင့် Prompt များအဖြစ် ပြောင်းလဲပါ။',
 
     // Tabs
@@ -201,7 +206,6 @@ const translations: Record<Language, Record<string, string>> = {
     'tab.edit': 'ပုံပြင်ဆင်မည်',
     'tab.analyze': 'သုံးသပ်မည်',
     'tab.simple_post': 'ကြော်ငြာပုံစံ',
-    'tab.collage': 'ပုံများ စုစည်းမည်',
 
     // Categories
     'cat.social': 'ဆိုရှယ်မီဒီယာ',
