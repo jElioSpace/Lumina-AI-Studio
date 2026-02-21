@@ -7,24 +7,32 @@ import { PromptEngineer } from './components/PromptEngineer';
 import { HistoryDrawer } from './components/HistoryDrawer';
 import { SettingsModal } from './components/SettingsModal';
 import { AuthScreen } from './components/AuthScreen';
+import { ApiKeyChecker } from './components/ApiKeyChecker';
 import { useLanguage } from './contexts/LanguageContext';
 import { useTheme } from './contexts/ThemeContext';
 import { useAuth } from './contexts/AuthContext';
 import { HistoryItem } from './types';
+import { getStoredApiKey } from './services/geminiService';
 
 type AppView = 'dashboard' | 'graphic' | 'content' | 'prompt';
 
 const App: React.FC = () => {
   const { user, loading: authLoading, signOut } = useAuth();
+  const [hasApiKey, setHasApiKey] = useState<boolean>(!!getStoredApiKey());
   const [view, setView] = useState<AppView>('dashboard');
   const [graphicPrompt, setGraphicPrompt] = useState<string>('');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  
+
   const [initialGraphicResult, setInitialGraphicResult] = useState<string>('');
   const [initialContentTopic, setInitialContentTopic] = useState<string>('');
   const [initialContentResult, setInitialContentResult] = useState<string>('');
 
   const { t } = useLanguage();
+
+  // Gate the entire app behind API key entry
+  if (!hasApiKey) {
+    return <ApiKeyChecker onKeyReady={() => setHasApiKey(true)} />;
+  }
 
   if (authLoading) {
     return (
@@ -45,9 +53,9 @@ const App: React.FC = () => {
   };
 
   const handleContentNavigation = (topic: string) => {
-     setInitialContentResult('');
-     setInitialContentTopic(topic);
-     setView('content');
+    setInitialContentResult('');
+    setInitialContentTopic(topic);
+    setView('content');
   };
 
   const handleHistorySelection = (item: HistoryItem) => {
@@ -131,9 +139,9 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex font-sans selection:bg-indigo-500/30 overflow-hidden">
-      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} onApiKeyReset={() => setHasApiKey(false)} />
       <HistoryDrawer onSelect={handleHistorySelection} />
-      
+
       <aside className="fixed inset-y-0 left-0 w-16 md:w-60 sidebar-glass z-50 flex flex-col items-center md:items-stretch py-6 md:py-8 transition-all">
         <div className="px-4 md:px-6 mb-10 flex items-center gap-3">
           <div className="w-9 h-9 md:w-10 md:h-10 bg-indigo-600 dark:bg-violet-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30 dark:shadow-violet-900/40">
@@ -152,11 +160,10 @@ const App: React.FC = () => {
             <button
               key={item.id}
               onClick={() => setView(item.id as AppView)}
-              className={`w-full flex items-center gap-4 px-3 md:px-4 py-3 rounded-xl md:rounded-2xl transition-all duration-200 group ${
-                view === item.id 
-                  ? 'bg-indigo-600 dark:bg-violet-600 text-white shadow-xl shadow-indigo-900/20 dark:shadow-violet-900/40' 
-                  : 'text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-violet-400 hover:bg-indigo-50 dark:hover:bg-slate-800/50'
-              }`}
+              className={`w-full flex items-center gap-4 px-3 md:px-4 py-3 rounded-xl md:rounded-2xl transition-all duration-200 group ${view === item.id
+                ? 'bg-indigo-600 dark:bg-violet-600 text-white shadow-xl shadow-indigo-900/20 dark:shadow-violet-900/40'
+                : 'text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-violet-400 hover:bg-indigo-50 dark:hover:bg-slate-800/50'
+                }`}
             >
               <span className="material-icons-round text-lg md:text-xl">{item.icon}</span>
               <span className="hidden md:inline font-bold text-xs tracking-wide">{item.label}</span>
@@ -167,28 +174,28 @@ const App: React.FC = () => {
 
         <div className="px-2 md:px-3 space-y-1 md:space-y-2 pt-6 border-t border-slate-100 dark:border-slate-800/50">
           <HistoryDrawer standalone />
-          
-          <button 
+
+          <button
             onClick={() => setIsSettingsOpen(true)}
             className="w-full flex items-center gap-4 px-3 md:px-4 py-3 rounded-xl md:rounded-2xl text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-violet-400 hover:bg-indigo-50 dark:hover:bg-slate-800/50 transition-all"
           >
-             <span className="material-icons-round text-lg md:text-xl">settings</span>
-             <span className="hidden md:inline font-bold text-xs tracking-wide">Settings</span>
+            <span className="material-icons-round text-lg md:text-xl">settings</span>
+            <span className="hidden md:inline font-bold text-xs tracking-wide">Settings</span>
           </button>
 
-          <button 
+          <button
             onClick={() => signOut()}
             className="w-full flex items-center gap-4 px-3 md:px-4 py-3 rounded-xl md:rounded-2xl text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all"
           >
-             <span className="material-icons-round text-lg md:text-xl">logout</span>
-             <span className="hidden md:inline font-bold text-xs tracking-wide">Logout</span>
+            <span className="material-icons-round text-lg md:text-xl">logout</span>
+            <span className="hidden md:inline font-bold text-xs tracking-wide">Logout</span>
           </button>
         </div>
       </aside>
 
       <main className="flex-grow ml-16 md:ml-60 flex flex-col h-screen overflow-hidden bg-[#f8fafc] dark:bg-[#0b1120] transition-colors relative">
-        <AppHeader 
-          title={view === 'dashboard' ? 'Overview' : t(`${view}.title`)} 
+        <AppHeader
+          title={view === 'dashboard' ? 'Overview' : t(`${view}.title`)}
         />
         <div className="flex-grow overflow-y-auto">
           {renderViewContent()}
