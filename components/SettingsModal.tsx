@@ -1,24 +1,41 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { getStoredApiKey, clearStoredApiKey } from '../services/geminiService';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
+  onApiKeyReset?: () => void;
 }
 
-export const SettingsModal: React.FC<Props> = ({ isOpen, onClose }) => {
+export const SettingsModal: React.FC<Props> = ({ isOpen, onClose, onApiKeyReset }) => {
   const { language, setLanguage } = useLanguage();
   const { theme, setTheme } = useTheme();
+  const [showKeyConfirm, setShowKeyConfirm] = useState(false);
+
+  const hasKey = !!getStoredApiKey();
+  const maskedKey = (() => {
+    const key = getStoredApiKey();
+    if (!key) return '';
+    return key.slice(0, 6) + '••••••••' + key.slice(-4);
+  })();
+
+  const handleResetKey = () => {
+    clearStoredApiKey();
+    setShowKeyConfirm(false);
+    onClose();
+    if (onApiKeyReset) onApiKeyReset();
+  };
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 overflow-hidden">
-      <div 
-        className="absolute inset-0 bg-slate-950/40 dark:bg-black/80 backdrop-blur-md animate-in fade-in duration-300" 
-        onClick={onClose} 
+      <div
+        className="absolute inset-0 bg-slate-950/40 dark:bg-black/80 backdrop-blur-md animate-in fade-in duration-300"
+        onClick={onClose}
       />
       <div className="relative w-full max-w-[340px] bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-slate-800/50 rounded-[2.5rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.3)] p-6 md:p-8 animate-in zoom-in slide-in-from-bottom-8 duration-300">
         <div className="flex items-center justify-between mb-8 px-2">
@@ -26,7 +43,7 @@ export const SettingsModal: React.FC<Props> = ({ isOpen, onClose }) => {
             <span className="material-icons-round text-lg text-indigo-500 dark:text-indigo-400">tune</span>
             Preferences
           </h2>
-          <button 
+          <button
             onClick={onClose}
             className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 dark:text-slate-500 transition-colors"
           >
@@ -35,19 +52,59 @@ export const SettingsModal: React.FC<Props> = ({ isOpen, onClose }) => {
         </div>
 
         <div className="space-y-10">
+          {/* API Key */}
+          <section>
+            <label className="block text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-4 ml-4">
+              Gemini API Key
+            </label>
+            {hasKey ? (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 bg-slate-100 dark:bg-black/40 px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-800/50">
+                  <span className="material-icons-round text-sm text-emerald-500">check_circle</span>
+                  <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 truncate flex-1">{maskedKey}</span>
+                </div>
+                {!showKeyConfirm ? (
+                  <button
+                    onClick={() => setShowKeyConfirm(true)}
+                    className="w-full py-2.5 rounded-full text-[11px] font-bold text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 border border-red-200 dark:border-red-900/30 transition-all"
+                  >
+                    Change API Key
+                  </button>
+                ) : (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleResetKey}
+                      className="flex-1 py-2.5 rounded-full text-[11px] font-bold bg-red-500 text-white hover:bg-red-600 transition-all"
+                    >
+                      Confirm Reset
+                    </button>
+                    <button
+                      onClick={() => setShowKeyConfirm(false)}
+                      className="flex-1 py-2.5 rounded-full text-[11px] font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 transition-all"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p className="text-[11px] text-slate-400 px-4">No key set. Restart the app to configure.</p>
+            )}
+          </section>
+
           {/* Interface Language */}
           <section>
             <label className="block text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-4 ml-4">
               Interface Language
             </label>
             <div className="flex bg-slate-100 dark:bg-black/40 p-1.5 rounded-full border border-slate-200 dark:border-slate-800/50 transition-colors">
-              <button 
+              <button
                 onClick={() => setLanguage('en')}
                 className={`flex-1 py-3 rounded-full text-[11px] font-bold transition-all duration-300 ${language === 'en' ? 'bg-[#7c3aed] text-white shadow-lg' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`}
               >
                 English (US)
               </button>
-              <button 
+              <button
                 onClick={() => setLanguage('mm')}
                 className={`flex-1 py-3 rounded-full text-[11px] font-bold transition-all duration-300 ${language === 'mm' ? 'bg-[#7c3aed] text-white shadow-lg' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`}
               >
@@ -62,14 +119,14 @@ export const SettingsModal: React.FC<Props> = ({ isOpen, onClose }) => {
               Appearance
             </label>
             <div className="flex bg-slate-100 dark:bg-black/40 p-1.5 rounded-full border border-slate-200 dark:border-slate-800/50 transition-colors">
-              <button 
+              <button
                 onClick={() => setTheme('light')}
                 className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-full text-[11px] font-bold transition-all duration-300 ${theme === 'light' ? 'bg-[#7c3aed] text-white shadow-lg' : 'text-slate-500 hover:text-slate-900'}`}
               >
                 <span className="material-icons-round text-sm">light_mode</span>
                 Light
               </button>
-              <button 
+              <button
                 onClick={() => setTheme('dark')}
                 className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-full text-[11px] font-bold transition-all duration-300 ${theme === 'dark' ? 'bg-[#7c3aed] text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'}`}
               >

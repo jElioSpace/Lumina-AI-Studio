@@ -2,9 +2,26 @@
 import { GoogleGenAI } from "@google/genai";
 import { ImageGenerationConfig, ImageEditConfig, ImageAnalyzeConfig, ContentGenerationConfig, SimplePostConfig, ImageCollageConfig } from "../types";
 
+export const API_KEY_STORAGE_KEY = 'lumina_gemini_api_key';
+
+export const getStoredApiKey = (): string | null => {
+  return localStorage.getItem(API_KEY_STORAGE_KEY);
+};
+
+export const setStoredApiKey = (key: string): void => {
+  localStorage.setItem(API_KEY_STORAGE_KEY, key);
+};
+
+export const clearStoredApiKey = (): void => {
+  localStorage.removeItem(API_KEY_STORAGE_KEY);
+};
+
 const getAIInstance = () => {
-  // Rely exclusively on process.env.API_KEY as per coding guidelines
-  return new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const apiKey = getStoredApiKey();
+  if (!apiKey) {
+    throw new Error("No API key configured. Please set your Gemini API key in Settings.");
+  }
+  return new GoogleGenAI({ apiKey });
 };
 
 const getSizeConfig = (sizeInput: string): { aspectRatio: string | undefined } => {
